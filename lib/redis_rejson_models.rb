@@ -18,8 +18,8 @@ module RedisRejsonModels
       redis.json_get key, Rejson::Path.root_path
     end
 
-    def self.mget(resource, keys)
-      redis.json_mget resource, keys, Rejson::Path.root_path
+    def self.mget(keys)
+      redis.json_mget(*keys, Rejson::Path.root_path)
     end
 
     def self.[]=(key, val)
