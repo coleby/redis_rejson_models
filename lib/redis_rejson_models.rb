@@ -1,7 +1,8 @@
+# frozen_string_literal: true
+
 require_relative 'env'
 
 module RedisRejsonModels
-
   # low level API
   class RJ
     def self.configure(redis:)
@@ -15,6 +16,10 @@ module RedisRejsonModels
     def self.[](key)
       # redis.json_get key
       redis.json_get key, Rejson::Path.root_path
+    end
+
+    def self.mget(resource, keys)
+      redis.json_mget resource, keys
     end
 
     def self.[]=(key, val)
@@ -33,26 +38,35 @@ module RedisRejsonModels
     end
 
     def count
-      ( RJ["#{resource}:count"] || 0 ).to_i
+      (RJ["#{resource}:count"] || 0).to_i
     end
 
     def get(id)
       data = RJ["#{resource}:#{id}"]
       return unless data
+
       new data
     end
 
-    def get_attr(id, attr)
+    def mget(ids)
+      data = RJ.mget(resource, ids)
+      return unless data
+
+      new data
+    end
+
+    def get_attr(id, _attr)
       key = "#{resource}:#{id}"
-      data = RJ.redis.json_get key, ".name"
+      data = RJ.redis.json_get key, '.name'
       return NilValue.new unless data
+
       data
     end
 
     def create(attrs)
       id = incr
       attrs.merge! id: id
-      obj  = new attrs
+      obj = new attrs
       RJ["#{resource}:#{id}"] = obj.attributes
       obj
     end
@@ -74,20 +88,19 @@ module RedisRejsonModels
     end
 
     def model_name
-      self.name.downcase
+      name.downcase
     end
-
   end
 
   module RedisRejsonModelMixin
-
     def update(attrs_new)
       raise "Can't update a resource without an `id`" unless id
+
       klass = self.class
       model = klass.get id
       attrs = model.attributes
       attrs.merge! attrs_new
-      obj   = klass.new attrs
+      obj = klass.new attrs
       RJ["#{self.class.resource}:#{id}"] = obj.attributes
       obj
     end
@@ -98,7 +111,7 @@ module RedisRejsonModels
       id = attrs[:id]
       unless id
         entry_id = klass.send :incr
-        attrs.merge! "id" => entry_id
+        attrs.merge! 'id' => entry_id
         id = entry_id
       end
 
@@ -106,7 +119,5 @@ module RedisRejsonModels
       self.id = id
       self
     end
-
   end
-
 end
