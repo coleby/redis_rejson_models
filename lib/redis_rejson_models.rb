@@ -49,7 +49,8 @@ module RedisRejsonModels
     end
 
     def mget(ids)
-      data = RJ.mget(resource, ids)
+      keys = ids.map { |i| "#{resource}:#{i}" }
+      data = RJ.mget(resource, keys)
       return unless data
 
       new data
