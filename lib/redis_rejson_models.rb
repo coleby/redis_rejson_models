@@ -28,7 +28,7 @@ module RedisRejsonModels
     end
 
     def self.del(key)
-      redis.json_get key, Rejson::Path.root_path
+      redis.json_del key, Rejson::Path.root_path
     end
   end
 
