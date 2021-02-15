@@ -26,6 +26,10 @@ module RedisRejsonModels
       # redis.json_set key, val
       redis.json_set key, Rejson::Path.root_path, val
     end
+
+    def self.del(key)
+      redis.json_get key, Rejson::Path.root_path
+    end
   end
 
   module RedisRejsonModelLib
@@ -46,6 +50,11 @@ module RedisRejsonModels
       return unless data
 
       new data
+    end
+
+    def del(id)
+      key = "#{resource}:#{id}"
+      RJ.del(key)
     end
 
     def mget(ids)
